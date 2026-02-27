@@ -95,7 +95,7 @@ public class Service {
 
     // Build the SOLR request URL
     var url = (String) RESTServer.getApplicationContext().get(Context.SOLR_URL);
-    var ep = joinUrl(url, "suggest");
+    var ep = joinUrl(url, RESTServer.getApplicationContext().get(Context.SOLR_CORE) + "/suggest");
     var q = ep + "?suggest.q=" + URLEncoder.encode(searchText, Charset.defaultCharset());
 
     // Open the connection to SOLR
