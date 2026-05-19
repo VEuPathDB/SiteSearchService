@@ -1,5 +1,6 @@
 package org.gusdb.sitesearch.service.exception;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -14,6 +15,11 @@ public class SiteSearchExceptionMapper implements ExceptionMapper<Exception> {
   @Override
   public Response toResponse(Exception exception) {
     try { throw exception; }
+
+    // map invalid request exceptions directly to JAX-RS BadRequestException (400)
+    catch (InvalidRequestException e) {
+      return new BadRequestException(e.getMessage()).getResponse();
+    }
 
     catch (SolrRuntimeException | SiteSearchRuntimeException e) {
       LOG.error("Server runtime exception occurred while processing request", e);

@@ -15,7 +15,7 @@ import org.json.JSONObject;
  *   searchText: string,
  *   pagination: {
  *     offset: integer,
- *     numRecords: integer (max 50)
+ *     numRecords: integer
  *   },
  *   restrictToProject?: string,
  *   restrictMetadataToOrganisms?: string[],
@@ -27,6 +27,9 @@ import org.json.JSONObject;
  * }
  */
 public class SearchRequest {
+
+  public static final int MAX_RECORDS_IN_TABULAR_RESPONSE = 150000;
+  public static final int MAX_RECORDS_IN_PAGED_RESPONSE = 50;
 
   private final String _searchText;
   private final Pagination _pagination;
@@ -40,8 +43,8 @@ public class SearchRequest {
     _searchText = translateSearchText(requestJson.getString("searchText"));
     if (expectAndRequirePagination) {
       _pagination = new Pagination(requestJson.getJSONObject("pagination"));
-      if (_pagination.getNumRecords() > 50)
-        throw new InvalidRequestException("numRecords must be <= 50");
+      if (_pagination.getNumRecords() > MAX_RECORDS_IN_PAGED_RESPONSE)
+        throw new InvalidRequestException("numRecords must be <= " + MAX_RECORDS_IN_PAGED_RESPONSE);
     }
     else {
       if (requestJson.has("pagination")) {
