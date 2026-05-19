@@ -223,11 +223,11 @@ public class Service {
     meta.validateRequest(request);
 
     // get stats on this search to test result size against max
-    SolrResponse statsResponse = SolrCalls.getSearchResponse(solr, request, meta, true, true, true, false);
+    int resultCount = SolrCalls.getSearchResponse(solr, request, meta, true, true, true, false).getTotalCount();
 
     // make sure the resulting document count is not higher than the max
-    if (statsResponse.getTotalCount() > MAX_RECORDS_IN_TABULAR_RESPONSE) {
-      throw new InvalidRequestException("Maximum number of results (" + MAX_RECORDS_IN_TABULAR_RESPONSE + ") exceeded.");
+    if (resultCount > MAX_RECORDS_IN_TABULAR_RESPONSE) {
+      throw new InvalidRequestException("Search result contains " + resultCount + " records, exceeding the maximum allowed (" + MAX_RECORDS_IN_TABULAR_RESPONSE + ").");
     }
 
     return Response.ok(new StreamingOutput() {
