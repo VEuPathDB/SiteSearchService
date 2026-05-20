@@ -1,11 +1,11 @@
 package org.gusdb.sitesearch.service.exception;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gusdb.fgputil.solr.SolrRuntimeException;
 
 public class SiteSearchExceptionMapper implements ExceptionMapper<Exception> {
@@ -16,9 +16,9 @@ public class SiteSearchExceptionMapper implements ExceptionMapper<Exception> {
   public Response toResponse(Exception exception) {
     try { throw exception; }
 
-    // map invalid request exceptions directly to JAX-RS BadRequestException (400)
+    // map invalid request exceptions to 400s and pass along message
     catch (InvalidRequestException e) {
-      return new BadRequestException(e.getMessage()).getResponse();
+      return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
     }
 
     catch (SolrRuntimeException | SiteSearchRuntimeException e) {
