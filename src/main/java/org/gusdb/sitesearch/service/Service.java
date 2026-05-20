@@ -1,5 +1,7 @@
 package org.gusdb.sitesearch.service;
 
+import static org.gusdb.sitesearch.service.request.SearchRequest.MAX_RECORDS_IN_TABULAR_RESPONSE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -7,7 +9,15 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Optional;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -19,6 +29,7 @@ import org.gusdb.fgputil.server.RESTServer;
 import org.gusdb.fgputil.solr.Solr;
 import org.gusdb.fgputil.solr.SolrResponse;
 import org.gusdb.fgputil.web.MimeTypes;
+import org.gusdb.sitesearch.service.exception.InvalidRequestException;
 import org.gusdb.sitesearch.service.metadata.Metadata;
 import org.gusdb.sitesearch.service.request.SearchRequest;
 import org.gusdb.sitesearch.service.server.Server.Context;
@@ -210,6 +221,14 @@ public class Service {
     // initialize metadata (2 SOLR calls for docTypes and fields)
     Metadata meta = SolrCalls.initializeMetadata(solr);
     meta.validateRequest(request);
+
+    // get stats on this search to test result size against max
+    int resultCount = SolrCalls.getSearchResponse(solr, request, meta, true, true, true, false).getTotalCount();
+
+    // make sure the resulting document count is not higher than the max
+    if (resultCount > MAX_RECORDS_IN_TABULAR_RESPONSE) {
+      throw new InvalidRequestException("Search result contains " + resultCount + " records, exceeding the maximum allowed (" + MAX_RECORDS_IN_TABULAR_RESPONSE + ").");
+    }
 
     return Response.ok(new StreamingOutput() {
       @Override
