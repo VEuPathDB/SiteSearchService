@@ -28,7 +28,9 @@ import org.json.JSONObject;
  */
 public class SearchRequest {
 
-  public static final int MAX_RECORDS_IN_TABULAR_RESPONSE = 150000;
+  // NOTE: this value should be synced with web-monorepo:SiteSearch.tsx:MAX_RESULT_SIZE_FOR_EXPORT
+  public static final int MAX_RECORDS_IN_TABULAR_RESPONSE = 100000;
+
   public static final int MAX_RECORDS_IN_PAGED_RESPONSE = 50;
 
   private final String _searchText;
